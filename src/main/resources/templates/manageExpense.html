@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<link rel="icon" type="image/x-icon" href="/images/donut.ico">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Expense</title>
+    <link rel="icon" type="image/x-icon" href="/images/donut.ico">
+    <link href="/webjars/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div th:insert="fragments/navbar :: navbar"></div>
+
+<div class="container">
+    <h1>Expenses</h1>
+
+    <!---- Form to add a Pizza ------>
+    <form method="post" th:action="@{/addExpense}" th:object="${expense}">
+        <div class="input-group mb-3 w-50 container d-flex justify-content-center">
+            <input required type="number" step="0.01" th:field="*{price}" class="form-control" placeholder="Expense">
+            <button class="btn btn-success" type="submit">Add</button>
+        </div>
+    </form>
+
+    <!---- Table to show all Pizza ------>
+    <table th:if="${expenses.size() > 0}" class="table table-striped">
+        <thead>
+        <tr>
+            <th>Expense</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="align-middle" th:each="expense : ${expenses}">
+            <td th:with="roundedPrice=${T(java.lang.Math).round(expense.price * 20) / 20.0}"
+                th:text="${#numbers.formatDecimal(roundedPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+
+            <td>
+                <span th:text="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"></span>
+            </td>
+            <td>
+                <img th:src="@{/images/{image}(image=${expense.imageName})}" height="40px">
+            </td>
+            <td>
+                <form method="post" th:action="@{/deleteExpense}">
+                    <input type="hidden" name="expenseId" th:value="${expense.id}"/>
+                    <button class="btn btn-outline-danger" type="submit">Delete</button>
+                </form>
+            </td>
+            <td>
+                <a th:href="|@{/editExpense}?id=${expense.id}|">
+                    <button class="btn btn-outline-danger" target="_blank">Edit</button>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:unless="${expenses.size() > 0}">
+        <h2> No expenses yet</h2>
+    </div>
+
+    <h2>Total Sum: <span th:text="${sumOfPrices} + ' CHF'"></span></h2>
+</div>
+<div class="d-flex justify-content-center">
+    <!-- Check if the sum of prices is more than 500 -->
+    <img th:if="${sumOfPrices > 500}" th:src="@{/images/money.jpg}" height="300px">
+    <!-- Check if the sum of prices is more than 100 but less than 500 -->
+    <img th:if="${sumOfPrices > 100 and sumOfPrices <= 500}" th:src="@{/images/money-dog.gif}" height="300px">
+    <!-- If not, use the regular image -->
+    <img th:unless="${sumOfPrices > 500 or sumOfPrices > 100}" th:src="@{/images/moneyokay.jpg}" height="300px">
+</div>
+
+<script src="/webjars/bootstrap/5.3.2/js/bootstrap.min.js"></script>
+</body>
+</html>
